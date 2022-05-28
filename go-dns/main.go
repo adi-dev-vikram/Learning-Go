@@ -4,7 +4,21 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
+
+	"golang.org/x/net/publicsuffix"
 )
+
+func checkForValidTLD(str string) bool {
+	etld, im := publicsuffix.PublicSuffix(str)
+	var validtld = false
+	if im { // ICANN managed
+		validtld = true
+	} else if strings.IndexByte(etld, '.') >= 0 { // privately managed
+		validtld = true
+	}
+	return validtld
+}
 
 func main() {
 	arguments := os.Args
@@ -13,6 +27,7 @@ func main() {
 		fmt.Println("Please provide an IP address!")
 		os.Exit(100)
 	}
+
 	IP := arguments[1]
 	addr := net.ParseIP(IP)
 	if addr == nil {
@@ -29,7 +44,7 @@ func main() {
 		fmt.Println(hostname)
 	}
 
-	hostname := arguments[1]
+	hostname := arguments[2]
 	IPs, err := net.LookupHost(hostname)
 	if err != nil {
 		fmt.Println(err)
@@ -42,7 +57,7 @@ func main() {
 	//DNS-related problems and finding out the status of a domain
 	//using NS lookup
 
-	domain := arguments[1]
+	domain := arguments[3]
 	NSs, err := net.LookupNS(domain)
 
 	if err != nil {
